@@ -7,5 +7,4 @@ resources:
   - ingress.yaml
   - pdb.yaml
   - networkpolicy.yaml
-  - servicemonitor.yaml
 
