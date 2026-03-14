@@ -8,7 +8,7 @@ spec:
   source:
     chart: strimzi-kafka-operator
     repoURL: https://strimzi.io/charts/
-    targetRevision: 0.44.0
+    targetRevision: 0.51.0
     helm:
       values: |
         watchNamespaces:
