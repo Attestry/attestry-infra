@@ -14,6 +14,7 @@ data:
   KAFKA_CLIENT_ID: core-service
   REDIS_HOST: attestry-redis-master.attestry.svc.cluster.local
   REDIS_PORT: "6379"
+  SPRING_DATA_REDIS_LETTUCE_PROTOCOL: RESP2
   APP_KAFKA_ENABLED: "true"
   WORKFLOW_READ_PROJECTION_SOURCE_TOPIC: product.projection.v1
   WORKFLOW_READ_PROJECTION_DLQ_TOPIC: product.projection.v1.dlq
