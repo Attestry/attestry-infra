@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: attestry-redis-master
+  namespace: attestry
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/part-of: attestry
+spec:
+  serviceName: attestry-redis-master
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+        app.kubernetes.io/part-of: attestry
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.4.2-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+              name: redis
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: core-runtime-secrets
+                  key: REDIS_PASSWORD
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              exec redis-server \
+                --requirepass "$REDIS_PASSWORD" \
+                --maxmemory 200mb \
+                --maxmemory-policy allkeys-lru \
+                --save "" \
+                --appendonly no
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  redis-cli -a "$REDIS_PASSWORD" ping
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp2
+        resources:
+          requests:
+            storage: 1Gi

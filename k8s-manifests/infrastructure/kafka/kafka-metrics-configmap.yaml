@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-metrics
+  namespace: kafka
+data:
+  kafka-metrics-config.yml: |
+    lowercaseOutputName: true
+    rules:
+      - pattern: kafka.server<type=BrokerTopicMetrics, name=(.+), topic=(.+)><>Count
+        name: kafka_server_brokertopicmetrics_$1_total
+        labels:
+          topic: "$2"
+        type: COUNTER
+      - pattern: kafka.server<type=FetcherLagMetrics, name=ConsumerLag, clientId=(.+), topic=(.+), partition=(.+)><>Value
+        name: kafka_server_fetcherlagmetrics_consumerlag
+        labels:
+          client_id: "$1"
+          topic: "$2"
+          partition: "$3"
+        type: GAUGE
+      - pattern: kafka.server<type=ReplicaManager, name=(.+)><>Value
+        name: kafka_server_replicamanager_$1
+        type: GAUGE
+      - pattern: kafka.network<type=RequestMetrics, name=RequestsPerSec, request=(.+), version=(.+)><>Count
+        name: kafka_network_requestmetrics_requestspersec_total
+        labels:
+          request: "$1"
+        type: COUNTER

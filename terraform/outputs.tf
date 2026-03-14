@@ -23,3 +23,44 @@ output "database_subnets" {
   description = "Database Subnets for RDS Aurora"
   value       = module.vpc.database_subnets
 }
+
+output "invitation_sqs_queue_name" {
+  description = "Invitation SQS queue name"
+  value       = aws_sqs_queue.invitation.name
+}
+
+output "invitation_sqs_queue_url" {
+  description = "Invitation SQS queue URL"
+  value       = aws_sqs_queue.invitation.url
+}
+
+output "assets_bucket_name" {
+  description = "Assets S3 bucket name"
+  value       = aws_s3_bucket.assets.bucket
+}
+
+output "rds_endpoint" {
+  description = "RDS PostgreSQL endpoint"
+  value       = aws_db_instance.postgres.address
+}
+
+output "rds_db_name" {
+  description = "RDS PostgreSQL database name"
+  value       = aws_db_instance.postgres.db_name
+}
+
+output "rds_db_username" {
+  description = "RDS PostgreSQL master username"
+  value       = aws_db_instance.postgres.username
+}
+
+output "rds_master_password" {
+  description = "RDS PostgreSQL master password"
+  value       = random_password.rds_master.result
+  sensitive   = true
+}
+
+output "rds_jdbc_url" {
+  description = "RDS PostgreSQL JDBC URL"
+  value       = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${aws_db_instance.postgres.db_name}"
+}

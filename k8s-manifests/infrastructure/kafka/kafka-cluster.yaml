@@ -1,0 +1,95 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: attestry-cluster
+  namespace: kafka
+spec:
+  kafka:
+    version: 3.8.0
+    replicas: 3
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      default.replication.factor: 3
+      min.insync.replicas: 2
+      log.retention.hours: 168
+      log.retention.bytes: -1
+      log.segment.bytes: 1073741824
+      log.cleanup.policy: delete
+      auto.create.topics.enable: false
+      num.partitions: 3
+      num.io.threads: 8
+      num.network.threads: 5
+      socket.send.buffer.bytes: 102400
+      socket.receive.buffer.bytes: 102400
+      socket.request.max.bytes: 104857600
+    storage:
+      type: jbod
+      volumes:
+        - id: 0
+          type: persistent-claim
+          class: kafka-ebs-gp3
+          size: 50Gi
+          deleteClaim: false
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+    jvmOptions:
+      -Xms: 1536m
+      -Xmx: 1536m
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: kafka-metrics-config.yml
+    template:
+      pod:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: strimzi.io/name
+                      operator: In
+                      values:
+                        - attestry-cluster-kafka
+                topologyKey: kubernetes.io/hostname
+        tolerations:
+          - key: dedicated
+            operator: Equal
+            value: kafka
+            effect: NoSchedule
+    rack:
+      topologyKey: topology.kubernetes.io/zone
+  entityOperator:
+    topicOperator:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+    userOperator:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi

@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ledger
+  namespace: attestry
+  labels:
+    app.kubernetes.io/name: ledger
+    app.kubernetes.io/part-of: attestry
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ledger
+  namespaceSelector:
+    matchNames:
+      - attestry
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 30s
