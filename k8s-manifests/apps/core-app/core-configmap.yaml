@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-config
+  namespace: attestry
+data:
+  SPRING_PROFILES_ACTIVE: dev
+  AUTH_TOKEN_PROVIDER: REDIS
+  # User action required: fill from `terraform -chdir=terraform output -raw rds_jdbc_url`
+  DB_URL: jdbc:postgresql://attestry-dev-postgres.cvmogq088lqo.ap-northeast-2.rds.amazonaws.com:5432/attestry_dev
+  # User action required: fill from `terraform -chdir=terraform output -raw rds_db_username`
+  DB_USERNAME: attestry_admin
+  KAFKA_BOOTSTRAP_SERVERS: attestry-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+  KAFKA_CLIENT_ID: core-service
+  REDIS_HOST: attestry-redis-master.attestry.svc.cluster.local
+  REDIS_PORT: "6379"
+  APP_KAFKA_ENABLED: "true"
+  WORKFLOW_READ_PROJECTION_SOURCE_TOPIC: product.projection.v1
+  WORKFLOW_READ_PROJECTION_DLQ_TOPIC: product.projection.v1.dlq
+  WORKFLOW_READ_PROJECTION_CONSUMER_GROUP_ID: workflow-product-read-projection-consumer
+  WORKFLOW_READ_PROJECTION_LISTENER_CONCURRENCY: "1"
+  PRODUCT_PUBLIC_BASE_URL: https://api.dev.attestry.local
+  INVITATION_MAIL_PROVIDER: SQS
+  INVITATION_MAIL_ENABLED: "true"
+  # User action required: change to the real frontend invitation URL template delivered via SQS payload
+  INVITATION_ACCEPT_URL_TEMPLATE: https://app.dev.attestry.local/invitations/accept?token=%s
+  # User action required: fill from `terraform -chdir=terraform output -raw invitation_sqs_queue_url`
+  INVITATION_SQS_QUEUE_URL: https://sqs.ap-northeast-2.amazonaws.com/459742122195/attestry-dev-invitations
+  PRODUCT_READ_PROJECTION_BACKFILL_ENABLED: "false"
+  PRODUCT_READ_PROJECTION_VALIDATION_ENABLED: "false"
+  WORKFLOW_READ_PROJECTION_BACKFILL_ENABLED: "false"
+  WORKFLOW_READ_PROJECTION_VALIDATION_ENABLED: "false"
+  INVITATION_SQS_REGION: ap-northeast-2
+  INVITATION_SQS_ENDPOINT: https://sqs.ap-northeast-2.amazonaws.com
+  STORAGE_PROVIDER: S3
+  # User action required: fill from `terraform -chdir=terraform output -raw assets_bucket_name`
+  S3_BUCKET: attestry-dev-assets
+  S3_ENDPOINT: https://s3.ap-northeast-2.amazonaws.com
+  AWS_REGION: ap-northeast-2
