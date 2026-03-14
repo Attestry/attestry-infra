@@ -3,10 +3,12 @@ kind: Kafka
 metadata:
   name: attestry-cluster
   namespace: kafka
+  annotations:
+    strimzi.io/node-pools: enabled
+    strimzi.io/kraft: enabled
 spec:
   kafka:
-    version: 3.8.0
-    replicas: 3
+    version: 4.2.0
     listeners:
       - name: plain
         port: 9092
@@ -33,47 +35,12 @@ spec:
       socket.send.buffer.bytes: 102400
       socket.receive.buffer.bytes: 102400
       socket.request.max.bytes: 104857600
-    storage:
-      type: jbod
-      volumes:
-        - id: 0
-          type: persistent-claim
-          class: kafka-ebs-gp3
-          size: 50Gi
-          deleteClaim: false
-    resources:
-      requests:
-        cpu: 500m
-        memory: 2Gi
-      limits:
-        cpu: "2"
-        memory: 4Gi
-    jvmOptions:
-      -Xms: 1536m
-      -Xmx: 1536m
     metricsConfig:
       type: jmxPrometheusExporter
       valueFrom:
         configMapKeyRef:
           name: kafka-metrics
           key: kafka-metrics-config.yml
-    template:
-      pod:
-        affinity:
-          podAntiAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchExpressions:
-                    - key: strimzi.io/name
-                      operator: In
-                      values:
-                        - attestry-cluster-kafka
-                topologyKey: kubernetes.io/hostname
-        tolerations:
-          - key: dedicated
-            operator: Equal
-            value: kafka
-            effect: NoSchedule
     rack:
       topologyKey: topology.kubernetes.io/zone
   entityOperator:
