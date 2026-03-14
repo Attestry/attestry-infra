@@ -25,6 +25,8 @@ spec:
     spec:
       nodeSelector:
         workload: app-services
+      imagePullSecrets:
+        - name: ghcr-credentials
       containers:
         - name: core
           image: ghcr.io/attestry/app:dev
