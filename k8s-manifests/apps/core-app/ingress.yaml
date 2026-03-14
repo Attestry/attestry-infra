@@ -15,8 +15,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: api.dev.attestry.local
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix

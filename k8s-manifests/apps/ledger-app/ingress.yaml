@@ -15,10 +15,9 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: ledger.dev.attestry.local
-      http:
+    - http:
         paths:
-          - path: /
+          - path: /ledger
             pathType: Prefix
             backend:
               service:
