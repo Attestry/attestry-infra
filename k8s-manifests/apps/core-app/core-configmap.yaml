@@ -24,7 +24,7 @@ data:
   INVITATION_MAIL_PROVIDER: SQS
   INVITATION_MAIL_ENABLED: "true"
   # User action required: change to the real frontend invitation URL template delivered via SQS payload
-  INVITATION_ACCEPT_URL_TEMPLATE: https://app.dev.attestry.local/invitations/accept?token=%s
+  INVITATION_ACCEPT_URL_TEMPLATE: https://proveny.live/invitations/accept?token=%s
   # User action required: fill from `terraform -chdir=terraform output -raw invitation_sqs_queue_url`
   INVITATION_SQS_QUEUE_URL: https://sqs.ap-northeast-2.amazonaws.com/459742122195/attestry-dev-invitations
   PRODUCT_READ_PROJECTION_BACKFILL_ENABLED: "false"
