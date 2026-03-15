@@ -26,6 +26,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "assets" {
   }
 }
 
+resource "aws_s3_bucket_cors_configuration" "assets" {
+  bucket = aws_s3_bucket.assets.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "POST"]
+    allowed_origins = ["http://localhost:5173", "http://localhost:3000"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3600
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "assets" {
   bucket = aws_s3_bucket.assets.id
 
