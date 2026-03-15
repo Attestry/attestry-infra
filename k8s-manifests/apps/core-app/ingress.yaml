@@ -15,7 +15,8 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - http:
+    - host: api.proveny.live
+      http:
         paths:
           - path: /
             pathType: Prefix
