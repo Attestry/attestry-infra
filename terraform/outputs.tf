@@ -34,6 +34,26 @@ output "invitation_sqs_queue_url" {
   value       = aws_sqs_queue.invitation.url
 }
 
+output "invitation_sqs_dlq_name" {
+  description = "Invitation SQS DLQ name"
+  value       = aws_sqs_queue.invitation_dlq.name
+}
+
+output "invitation_sqs_dlq_url" {
+  description = "Invitation SQS DLQ URL"
+  value       = aws_sqs_queue.invitation_dlq.url
+}
+
+output "invitation_email_lambda_name" {
+  description = "Invitation email Lambda function name"
+  value       = aws_lambda_function.invitation_email.function_name
+}
+
+output "invitation_email_lambda_log_group_name" {
+  description = "CloudWatch Logs group for the invitation email Lambda"
+  value       = aws_cloudwatch_log_group.invitation_email_lambda.name
+}
+
 output "assets_bucket_name" {
   description = "Assets S3 bucket name"
   value       = aws_s3_bucket.assets.bucket
