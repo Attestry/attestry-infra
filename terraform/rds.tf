@@ -29,6 +29,17 @@ resource "aws_security_group" "rds" {
     security_groups = [module.eks.node_security_group_id]
   }
 
+  ingress {
+    description = "PostgreSQL from dev team"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = [
+      "211.60.161.245/32",
+      "61.43.122.41/32",
+    ]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -63,7 +74,7 @@ resource "aws_db_instance" "postgres" {
   backup_window           = "18:00-19:00"
   maintenance_window      = "sun:19:00-sun:20:00"
   multi_az                = false
-  publicly_accessible     = false
+  publicly_accessible     = true
   deletion_protection     = false
   skip_final_snapshot     = true
   apply_immediately       = true
