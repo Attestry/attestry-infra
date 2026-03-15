@@ -32,7 +32,7 @@ resource "aws_s3_bucket_cors_configuration" "assets" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "PUT", "POST"]
-    allowed_origins = ["http://localhost:5173", "http://localhost:3000"]
+    allowed_origins = ["http://localhost:5173", "http://localhost:3000", "https://proveny.live"]
     expose_headers  = ["ETag"]
     max_age_seconds = 3600
   }
