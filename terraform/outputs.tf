@@ -84,3 +84,19 @@ output "rds_jdbc_url" {
   description = "RDS PostgreSQL JDBC URL"
   value       = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${aws_db_instance.postgres.db_name}"
 }
+
+output "acm_certificate_arn" {
+  description = "ACM certificate ARN for proveny.live"
+  value       = aws_acm_certificate.proveny.arn
+}
+
+output "acm_dns_validation_records" {
+  description = "DNS validation CNAME records — add these in Cloudflare"
+  value = {
+    for dvo in aws_acm_certificate.proveny.domain_validation_options : dvo.domain_name => {
+      name  = dvo.resource_record_name
+      type  = dvo.resource_record_type
+      value = dvo.resource_record_value
+    }
+  }
+}
