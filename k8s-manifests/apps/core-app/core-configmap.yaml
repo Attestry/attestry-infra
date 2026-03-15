@@ -39,5 +39,5 @@ data:
   S3_ENDPOINT: https://s3.ap-northeast-2.amazonaws.com
   AWS_REGION: ap-northeast-2
   APP_BOOTSTRAP_PLATFORM_ADMIN_ENABLED: "true"
-  APP_BOOTSTRAP_PLATFORM_ADMIN_EMAIL: platform.admin@attestry.local
+  APP_BOOTSTRAP_PLATFORM_ADMIN_EMAIL: platform.admin@attestry.dev
   APP_BOOTSTRAP_PLATFORM_ADMIN_PHONE: "010-0000-0000"
