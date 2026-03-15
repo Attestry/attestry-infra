@@ -9,7 +9,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
-SES_CLIENT = boto3.client("ses", region_name=os.environ.get("AWS_REGION"))
+SES_CLIENT = boto3.client("ses", region_name=os.environ.get("SES_REGION"))
 
 FROM_EMAIL_ADDRESS = os.environ["FROM_EMAIL_ADDRESS"]
 REPLY_TO_ADDRESS = os.environ.get("REPLY_TO_ADDRESS", "").strip()

@@ -125,7 +125,7 @@ resource "aws_lambda_function" "invitation_email" {
 
   environment {
     variables = {
-      AWS_REGION         = var.aws_region
+      SES_REGION         = var.aws_region
       FROM_EMAIL_ADDRESS = var.from_email_address
       REPLY_TO_ADDRESS   = var.reply_to_address
       SUBJECT_PREFIX     = var.subject_prefix
