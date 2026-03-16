@@ -37,6 +37,7 @@ resource "aws_security_group" "rds" {
     cidr_blocks = [
       "211.60.161.245/32",
       "61.43.122.41/32",
+      "193.186.4.167/32",
     ]
   }
 
