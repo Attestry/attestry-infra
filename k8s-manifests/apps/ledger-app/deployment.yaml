@@ -29,7 +29,7 @@ spec:
         - name: ghcr-credentials
       containers:
         - name: ledger
-          image: ghcr.io/attestry/ledger-service:021634f6fda6
+          image: ghcr.io/attestry/ledger-service:6e9ddc43f14e
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
