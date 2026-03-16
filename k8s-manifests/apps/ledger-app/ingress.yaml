@@ -17,10 +17,10 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: api.proveny.live
+    - host: ledger-api.proveny.live
       http:
         paths:
-          - path: /ledger
+          - path: /
             pathType: Prefix
             backend:
               service:
