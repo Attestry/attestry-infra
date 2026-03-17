@@ -130,6 +130,7 @@ def build_html_body(invitation_id, tenant_id, accept_url):
 
 
 def process_passport_manual_delivery(body):
+    LOGGER.info("Passport manual delivery payload: %s", json.dumps(body, default=str))
     passport_id = require_field(body, "passportId")
     tenant_id = body.get("tenantId", "")
     recipient_email = require_field(body, "recipientEmail")
@@ -230,7 +231,17 @@ def send_email_with_attachments(recipient, subject, text_body, html_body, attach
         content_type = att.get("contentType", "application/octet-stream")
 
         if not object_key:
-            LOGGER.warning("Skipping attachment with missing objectKey")
+            download_url = att.get("downloadUrl", "")
+            if download_url:
+                try:
+                    from urllib.parse import urlparse
+                    parsed = urlparse(download_url)
+                    object_key = parsed.path.lstrip("/")
+                except Exception:
+                    LOGGER.warning("Failed to parse downloadUrl: %s", download_url)
+
+        if not object_key:
+            LOGGER.warning("Skipping attachment with missing objectKey and downloadUrl")
             continue
 
         try:
