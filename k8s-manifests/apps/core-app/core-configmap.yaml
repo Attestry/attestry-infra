@@ -49,7 +49,7 @@ data:
   PASSPORT_MANUAL_SQS_QUEUE_URL: https://sqs.ap-northeast-2.amazonaws.com/459742122195/attestry-dev-passport-manual-notification
   PASSPORT_MANUAL_SQS_REGION: ap-northeast-2
   PASSPORT_MANUAL_SQS_ENDPOINT: https://sqs.ap-northeast-2.amazonaws.com
-  APP_BOOTSTRAP_PLATFORM_ADMIN_ENABLED: "true"
+  APP_BOOTSTRAP_PLATFORM_ADMIN_ENABLED: "false"
   APP_BOOTSTRAP_PLATFORM_ADMIN_EMAIL: platform.admin@attestry.dev
   APP_BOOTSTRAP_PLATFORM_ADMIN_PHONE: "010-0000-0000"
   
