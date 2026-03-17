@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-core-pipeline
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  core-pipeline.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "links": [],
+      "panels": [
+        {
+          "title": "Outbox Pending Size",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "targets": [{ "expr": "ledger_outbox_pending_size", "legendFormat": "pending" }]
+        },
+        {
+          "title": "Outbox Pending Oldest Age",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "targets": [{ "expr": "ledger_outbox_pending_oldest_age", "legendFormat": "oldest age" }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "title": "Outbox Processing / Failed Size",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "targets": [
+            { "expr": "ledger_outbox_processing_size", "legendFormat": "processing" },
+            { "expr": "ledger_outbox_failed_size", "legendFormat": "failed" }
+          ]
+        },
+        {
+          "title": "Outbox Publish Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+          "targets": [
+            { "expr": "rate(ledger_outbox_publish_count_total[5m])", "legendFormat": "total" },
+            { "expr": "rate(ledger_outbox_publish_success_count_total[5m])", "legendFormat": "success" },
+            { "expr": "rate(ledger_outbox_publish_failure_count_total[5m])", "legendFormat": "failure" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Outbox Durations",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+          "targets": [
+            { "expr": "ledger_outbox_publish_duration", "legendFormat": "publish" },
+            { "expr": "ledger_outbox_batch_duration", "legendFormat": "batch" },
+            { "expr": "ledger_outbox_claim_duration", "legendFormat": "claim" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "title": "Outbox Recovered / Timeout Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+          "targets": [
+            { "expr": "rate(ledger_outbox_recovered_count_total[5m])", "legendFormat": "recovered" },
+            { "expr": "rate(ledger_outbox_processing_timeout_count_total[5m])", "legendFormat": "timeout" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Projection Consume Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+          "targets": [{ "expr": "rate(workflow_projection_consume_count_total[5m])", "legendFormat": "consume" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Projection DLQ Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+          "targets": [{ "expr": "rate(workflow_projection_dlq_count_total[5m])", "legendFormat": "DLQ" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Projection Lag / Refresh Duration",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+          "targets": [
+            { "expr": "workflow_projection_lag", "legendFormat": "lag" },
+            { "expr": "workflow_projection_refresh_duration", "legendFormat": "refresh duration" }
+          ]
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["attestry", "core", "outbox", "projection"],
+      "templating": { "list": [] },
+      "time": { "from": "now-1h", "to": "now" },
+      "title": "Attestry — Core Event Pipeline",
+      "uid": "attestry-core-pipeline"
+    }

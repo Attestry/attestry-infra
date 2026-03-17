@@ -1,0 +1,162 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: attestry-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    # ── Common Critical ──
+    - name: common.critical
+      rules:
+        - alert: ScrapeTargetDown
+          expr: up{job=~"core|ledger"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Scrape target {{ $labels.job }} is down"
+        - alert: Http5xxRateHigh
+          expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (job) > 0.5
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.job }} 5xx rate is high"
+        - alert: PodRestartLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace="attestry"}[30m]) > 3
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.pod }} restarting repeatedly"
+        - alert: OOMKilled
+          expr: kube_pod_container_status_last_terminated_reason{namespace="attestry", reason="OOMKilled"} == 1
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.pod }} was OOMKilled"
+
+    # ── Common Warning ──
+    - name: common.warning
+      rules:
+        - alert: HighCpuUsage
+          expr: rate(process_cpu_usage{job=~"core|ledger"}[5m]) > 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.job }} CPU usage above 80%"
+        - alert: HighMemoryUsage
+          expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.job }} heap usage above 85%"
+
+    # ── Core Outbox Critical ──
+    - name: core.outbox.critical
+      rules:
+        - alert: OutboxFailedSizeAboveZero
+          expr: ledger_outbox_failed_size > 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Outbox failed size is {{ $value }}"
+        - alert: OutboxPublishFailure
+          expr: rate(ledger_outbox_publish_failure_count_total[5m]) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Outbox publish failures detected"
+
+    # ── Core Outbox Warning ──
+    - name: core.outbox.warning
+      rules:
+        - alert: OutboxPendingOldestAgeHigh
+          expr: ledger_outbox_pending_oldest_age > 60
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Outbox oldest pending age is {{ $value }}s"
+        - alert: OutboxPendingSizeGrowing
+          expr: delta(ledger_outbox_pending_size[10m]) > 50
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Outbox pending size growing steadily"
+        - alert: OutboxProcessingTimeout
+          expr: rate(ledger_outbox_processing_timeout_count_total[5m]) > 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Outbox processing timeouts detected"
+        - alert: OutboxRecoveredCount
+          expr: rate(ledger_outbox_recovered_count_total[5m]) > 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Outbox recovered events detected"
+
+    # ── Core Projection ──
+    - name: core.projection
+      rules:
+        - alert: ProjectionDlqIncreasing
+          expr: rate(workflow_projection_dlq_count_total[5m]) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Projection DLQ is receiving messages"
+        - alert: ProjectionLagHigh
+          expr: workflow_projection_lag > 1000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Projection lag is {{ $value }}"
+
+    # ── Ledger Critical ──
+    - name: ledger.critical
+      rules:
+        - alert: LedgerDlqIncreasing
+          expr: rate(outbox_dlq_count_total[5m]) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Ledger DLQ is receiving messages"
+        - alert: LedgerIntegrityInvalid
+          expr: increase(ledger_integrity_check_total{result="invalid"}[1h]) > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Ledger integrity check found invalid entries"
+        - alert: LedgerConsumeFailure
+          expr: rate(ledger_kafka_consume_count_total{result="failure"}[5m]) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Ledger Kafka consume failures detected"
+
+    # ── Ledger Warning ──
+    - name: ledger.warning
+      rules:
+        - alert: LedgerConsumeLagHigh
+          expr: ledger_kafka_consume_lag > 1000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Ledger consume lag is {{ $value }}"
