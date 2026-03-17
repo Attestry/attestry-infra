@@ -7,7 +7,7 @@ data:
   SPRING_PROFILES_ACTIVE: dev
   SERVER_PORT: "8081"
   # User action required: fill from `terraform -chdir=terraform output -raw rds_jdbc_url`
-  DB_URL: jdbc:postgresql://attestry-dev-postgres.cvmogq088lqo.ap-northeast-2.rds.amazonaws.com:5432/attestry_dev
+  DB_URL: jdbc:postgresql://attestry-dev-postgres.cvmogq088lqo.ap-northeast-2.rds.amazonaws.com:5432/attestry_ledger_db
   # User action required: fill from `terraform -chdir=terraform output -raw rds_db_username`
   DB_USERNAME: attestry_admin
   LEDGER_DB_SCHEMA: ledger
