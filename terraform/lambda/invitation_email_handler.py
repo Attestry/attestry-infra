@@ -126,10 +126,10 @@ def build_html_body(invitation_id, tenant_id, accept_url):
 
 def process_passport_manual_delivery(body):
     passport_id = require_field(body, "passportId")
-    tenant_id = require_field(body, "tenantId")
+    tenant_id = body.get("tenantId", "")
     recipient_email = require_field(body, "recipientEmail")
-    serial_number = require_field(body, "serialNumber")
-    model_name = require_field(body, "modelName")
+    serial_number = body.get("serialNumber", "")
+    model_name = body.get("modelName", "")
     message = body.get("message", "")
 
     subject = build_passport_manual_subject(model_name)
