@@ -41,7 +41,6 @@ data:
   AWS_REGION: ap-northeast-2
   SIGNUP_EMAIL_VERIFICATION_MAIL_PROVIDER: SQS
   SIGNUP_EMAIL_VERIFICATION_MAIL_ENABLED: "true"
-  SIGNUP_EMAIL_VERIFICATION_MAIL_FROM: no-reply@proveny.live
   SIGNUP_EMAIL_VERIFICATION_SQS_QUEUE_URL: https://sqs.ap-northeast-2.amazonaws.com/459742122195/attestry-dev-signup-email-verification
   SIGNUP_EMAIL_VERIFICATION_SQS_REGION: ap-northeast-2
   SIGNUP_EMAIL_VERIFICATION_SQS_ENDPOINT: https://sqs.ap-northeast-2.amazonaws.com
