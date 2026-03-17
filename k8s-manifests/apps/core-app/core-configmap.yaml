@@ -21,7 +21,7 @@ data:
   WORKFLOW_READ_PROJECTION_CONSUMER_GROUP_ID: workflow-product-read-projection-consumer
   WORKFLOW_READ_PROJECTION_LISTENER_CONCURRENCY: "2"
   KAFKA_OUTBOX_PROCESSING_TIMEOUT_SECONDS: "300"
-  PRODUCT_PUBLIC_BASE_URL: https://api.dev.attestry.local
+  PRODUCT_PUBLIC_BASE_URL: https://api.dev.attestry.local    
   INVITATION_MAIL_PROVIDER: SQS
   INVITATION_MAIL_ENABLED: "true"
   # User action required: change to the real frontend invitation URL template delivered via SQS payload
@@ -42,3 +42,4 @@ data:
   APP_BOOTSTRAP_PLATFORM_ADMIN_ENABLED: "true"
   APP_BOOTSTRAP_PLATFORM_ADMIN_EMAIL: platform.admin@attestry.dev
   APP_BOOTSTRAP_PLATFORM_ADMIN_PHONE: "010-0000-0000"
+  

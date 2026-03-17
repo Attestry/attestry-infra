@@ -85,6 +85,16 @@ output "rds_jdbc_url" {
   value       = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${aws_db_instance.postgres.db_name}"
 }
 
+output "signup_verification_sqs_queue_url" {
+  description = "Signup email verification SQS queue URL"
+  value       = aws_sqs_queue.signup_verification.url
+}
+
+output "signup_verification_sqs_dlq_url" {
+  description = "Signup email verification SQS DLQ URL"
+  value       = aws_sqs_queue.signup_verification_dlq.url
+}
+
 output "acm_certificate_arn" {
   description = "ACM certificate ARN for proveny.live"
   value       = aws_acm_certificate.proveny.arn

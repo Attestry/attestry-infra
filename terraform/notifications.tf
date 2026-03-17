@@ -11,6 +11,9 @@ locals {
   invitation_dlq_name       = "${local.name_prefix}-invitations-dlq${var.invitation_queue_fifo ? ".fifo" : ""}"
   invitation_lambda_name    = "${local.name_prefix}-invitation-email-handler"
   invitation_lambda_log_grp = "/aws/lambda/${local.invitation_lambda_name}"
+
+  signup_verification_queue_name = "${local.name_prefix}-signup-email-verification"
+  signup_verification_dlq_name   = "${local.name_prefix}-signup-email-verification-dlq"
 }
 
 resource "aws_sqs_queue" "invitation_dlq" {
@@ -148,5 +151,46 @@ resource "aws_lambda_event_source_mapping" "invitation_email" {
   batch_size                         = var.invitation_lambda_batch_size
   function_response_types            = ["ReportBatchItemFailures"]
   maximum_batching_window_in_seconds = var.invitation_queue_fifo ? null : 5
+  enabled                            = true
+}
+
+# ── Signup Email Verification SQS ──
+
+resource "aws_sqs_queue" "signup_verification_dlq" {
+  name                      = local.signup_verification_dlq_name
+  message_retention_seconds = var.invitation_queue_message_retention_seconds
+
+  tags = local.common_tags
+}
+
+resource "aws_sqs_queue" "signup_verification" {
+  name                       = local.signup_verification_queue_name
+  visibility_timeout_seconds = var.invitation_queue_visibility_timeout_seconds
+  message_retention_seconds  = var.invitation_queue_message_retention_seconds
+  receive_wait_time_seconds  = var.invitation_queue_receive_wait_time_seconds
+
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.signup_verification_dlq.arn
+    maxReceiveCount     = var.invitation_dlq_max_receive_count
+  })
+
+  tags = local.common_tags
+}
+
+resource "aws_sqs_queue_redrive_allow_policy" "signup_verification_dlq" {
+  queue_url = aws_sqs_queue.signup_verification_dlq.id
+
+  redrive_allow_policy = jsonencode({
+    redrivePermission = "byQueue"
+    sourceQueueArns   = [aws_sqs_queue.signup_verification.arn]
+  })
+}
+
+resource "aws_lambda_event_source_mapping" "signup_verification_email" {
+  event_source_arn                   = aws_sqs_queue.signup_verification.arn
+  function_name                      = aws_lambda_function.invitation_email.arn
+  batch_size                         = var.invitation_lambda_batch_size
+  function_response_types            = ["ReportBatchItemFailures"]
+  maximum_batching_window_in_seconds = 5
   enabled                            = true
 }
