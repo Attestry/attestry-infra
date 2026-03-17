@@ -14,6 +14,9 @@ locals {
 
   signup_verification_queue_name = "${local.name_prefix}-signup-email-verification"
   signup_verification_dlq_name   = "${local.name_prefix}-signup-email-verification-dlq"
+
+  passport_manual_queue_name = "${local.name_prefix}-passport-manual-notification"
+  passport_manual_dlq_name   = "${local.name_prefix}-passport-manual-notification-dlq"
 }
 
 resource "aws_sqs_queue" "invitation_dlq" {
@@ -188,6 +191,47 @@ resource "aws_sqs_queue_redrive_allow_policy" "signup_verification_dlq" {
 
 resource "aws_lambda_event_source_mapping" "signup_verification_email" {
   event_source_arn                   = aws_sqs_queue.signup_verification.arn
+  function_name                      = aws_lambda_function.invitation_email.arn
+  batch_size                         = var.invitation_lambda_batch_size
+  function_response_types            = ["ReportBatchItemFailures"]
+  maximum_batching_window_in_seconds = 5
+  enabled                            = true
+}
+
+# ── Passport Manual Notification SQS ──
+
+resource "aws_sqs_queue" "passport_manual_dlq" {
+  name                      = local.passport_manual_dlq_name
+  message_retention_seconds = var.invitation_queue_message_retention_seconds
+
+  tags = local.common_tags
+}
+
+resource "aws_sqs_queue" "passport_manual" {
+  name                       = local.passport_manual_queue_name
+  visibility_timeout_seconds = var.invitation_queue_visibility_timeout_seconds
+  message_retention_seconds  = var.invitation_queue_message_retention_seconds
+  receive_wait_time_seconds  = var.invitation_queue_receive_wait_time_seconds
+
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.passport_manual_dlq.arn
+    maxReceiveCount     = var.invitation_dlq_max_receive_count
+  })
+
+  tags = local.common_tags
+}
+
+resource "aws_sqs_queue_redrive_allow_policy" "passport_manual_dlq" {
+  queue_url = aws_sqs_queue.passport_manual_dlq.id
+
+  redrive_allow_policy = jsonencode({
+    redrivePermission = "byQueue"
+    sourceQueueArns   = [aws_sqs_queue.passport_manual.arn]
+  })
+}
+
+resource "aws_lambda_event_source_mapping" "passport_manual_email" {
+  event_source_arn                   = aws_sqs_queue.passport_manual.arn
   function_name                      = aws_lambda_function.invitation_email.arn
   batch_size                         = var.invitation_lambda_batch_size
   function_response_types            = ["ReportBatchItemFailures"]

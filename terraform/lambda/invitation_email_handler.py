@@ -16,6 +16,7 @@ REPLY_TO_ADDRESS = os.environ.get("REPLY_TO_ADDRESS", "").strip()
 SUBJECT_PREFIX = os.environ.get("SUBJECT_PREFIX", "").strip()
 INVITATION_TYPE = "INVITATION"
 SIGNUP_EMAIL_VERIFICATION_TYPE = "SIGNUP_EMAIL_VERIFICATION"
+PASSPORT_MANUAL_DELIVERY_TYPE = "PASSPORT_MANUAL_DELIVERY"
 
 
 def lambda_handler(event, _context):
@@ -41,6 +42,8 @@ def process_record(record):
         process_invitation(body)
     elif message_type == SIGNUP_EMAIL_VERIFICATION_TYPE:
         process_signup_verification(body)
+    elif message_type == PASSPORT_MANUAL_DELIVERY_TYPE:
+        process_passport_manual_delivery(body)
     else:
         LOGGER.info("Skipping unsupported message type: %s", message_type)
 
@@ -116,6 +119,58 @@ def build_html_body(invitation_id, tenant_id, accept_url):
           <li><strong>Tenant ID:</strong> {tenant_id}</li>
           <li><strong>Accept URL:</strong> <a href="{accept_url}">{accept_url}</a></li>
         </ul>
+      </body>
+    </html>
+    """.strip()
+
+
+def process_passport_manual_delivery(body):
+    passport_id = require_field(body, "passportId")
+    tenant_id = require_field(body, "tenantId")
+    recipient_email = require_field(body, "recipientEmail")
+    serial_number = require_field(body, "serialNumber")
+    model_name = require_field(body, "modelName")
+    message = body.get("message", "")
+
+    subject = build_passport_manual_subject(model_name)
+    text_body = build_passport_manual_text_body(serial_number, model_name, message)
+    html_body = build_passport_manual_html_body(serial_number, model_name, message)
+
+    send_email(recipient_email, subject, text_body, html_body)
+
+    LOGGER.info(
+        "Passport manual delivery email sent for passportId=%s tenantId=%s recipientEmail=%s",
+        passport_id,
+        tenant_id,
+        recipient_email,
+    )
+
+
+def build_passport_manual_subject(model_name):
+    base_subject = f"[Attestry] Your Digital Passport for {model_name}"
+    return f"{SUBJECT_PREFIX} {base_subject}".strip() if SUBJECT_PREFIX else base_subject
+
+
+def build_passport_manual_text_body(serial_number, model_name, message):
+    body = (
+        f"Your digital passport for {model_name} is ready.\n\n"
+        f"Serial Number: {serial_number}\n"
+    )
+    if message:
+        body += f"\nMessage: {message}\n"
+    return body
+
+
+def build_passport_manual_html_body(serial_number, model_name, message):
+    message_html = f"<p><strong>Message:</strong> {message}</p>" if message else ""
+    return f"""
+    <html>
+      <body>
+        <p>Your digital passport for <strong>{model_name}</strong> is ready.</p>
+        <ul>
+          <li><strong>Serial Number:</strong> {serial_number}</li>
+        </ul>
+        {message_html}
       </body>
     </html>
     """.strip()

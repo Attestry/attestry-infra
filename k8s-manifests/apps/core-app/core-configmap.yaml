@@ -44,6 +44,11 @@ data:
   SIGNUP_EMAIL_VERIFICATION_SQS_QUEUE_URL: https://sqs.ap-northeast-2.amazonaws.com/459742122195/attestry-dev-signup-email-verification
   SIGNUP_EMAIL_VERIFICATION_SQS_REGION: ap-northeast-2
   SIGNUP_EMAIL_VERIFICATION_SQS_ENDPOINT: https://sqs.ap-northeast-2.amazonaws.com
+  PASSPORT_MANUAL_MAIL_PROVIDER: SQS
+  PASSPORT_MANUAL_MAIL_ENABLED: "true"
+  PASSPORT_MANUAL_SQS_QUEUE_URL: https://sqs.ap-northeast-2.amazonaws.com/459742122195/attestry-dev-passport-manual-notification
+  PASSPORT_MANUAL_SQS_REGION: ap-northeast-2
+  PASSPORT_MANUAL_SQS_ENDPOINT: https://sqs.ap-northeast-2.amazonaws.com
   APP_BOOTSTRAP_PLATFORM_ADMIN_ENABLED: "true"
   APP_BOOTSTRAP_PLATFORM_ADMIN_EMAIL: platform.admin@attestry.dev
   APP_BOOTSTRAP_PLATFORM_ADMIN_PHONE: "010-0000-0000"
