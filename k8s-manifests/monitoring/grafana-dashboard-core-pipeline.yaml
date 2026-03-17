@@ -90,6 +90,22 @@ data:
             { "expr": "workflow_projection_lag", "legendFormat": "lag" },
             { "expr": "workflow_projection_refresh_duration", "legendFormat": "refresh duration" }
           ]
+        },
+        {
+          "title": "Outbox Ordering Violations",
+          "type": "stat",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+          "targets": [{ "expr": "increase(ledger_outbox_ordering_violation_count_total{application=\"attestry\"}[10m])", "legendFormat": "violations" }],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 1 }
+                ]
+              }
+            }
+          }
         }
       ],
       "schemaVersion": 39,

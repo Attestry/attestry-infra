@@ -67,6 +67,13 @@ spec:
             severity: critical
           annotations:
             summary: "Outbox failed size is {{ $value }}"
+        - alert: OutboxOrderingViolation
+          expr: increase(ledger_outbox_ordering_violation_count_total{application="attestry"}[10m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Outbox ordering violation detected"
         - alert: OutboxPublishFailure
           expr: rate(ledger_outbox_publish_failure_count_total[5m]) > 0
           for: 2m
