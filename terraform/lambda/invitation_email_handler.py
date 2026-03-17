@@ -15,6 +15,7 @@ FROM_EMAIL_ADDRESS = os.environ["FROM_EMAIL_ADDRESS"]
 REPLY_TO_ADDRESS = os.environ.get("REPLY_TO_ADDRESS", "").strip()
 SUBJECT_PREFIX = os.environ.get("SUBJECT_PREFIX", "").strip()
 INVITATION_TYPE = "INVITATION"
+SIGNUP_EMAIL_VERIFICATION_TYPE = "SIGNUP_EMAIL_VERIFICATION"
 
 
 def lambda_handler(event, _context):
@@ -36,10 +37,15 @@ def process_record(record):
     body = json.loads(record["body"])
     message_type = body.get("type")
 
-    if message_type != INVITATION_TYPE:
+    if message_type == INVITATION_TYPE:
+        process_invitation(body)
+    elif message_type == SIGNUP_EMAIL_VERIFICATION_TYPE:
+        process_signup_verification(body)
+    else:
         LOGGER.info("Skipping unsupported message type: %s", message_type)
-        return
 
+
+def process_invitation(body):
     invitation_id = require_field(body, "invitationId")
     tenant_id = require_field(body, "tenantId")
     invitee_email = require_field(body, "inviteeEmail")
@@ -56,6 +62,26 @@ def process_record(record):
         invitation_id,
         tenant_id,
         invitee_email,
+    )
+
+
+def process_signup_verification(body):
+    verification_id = require_field(body, "verificationId")
+    email = require_field(body, "email")
+    code = require_field(body, "code")
+    expires_in = body.get("expiresInSeconds", 600)
+    expires_min = expires_in // 60
+
+    subject = build_verification_subject()
+    text_body = build_verification_text_body(code, expires_min)
+    html_body = build_verification_html_body(code, expires_min)
+
+    send_email(email, subject, text_body, html_body)
+
+    LOGGER.info(
+        "Signup verification email sent for verificationId=%s email=%s",
+        verification_id,
+        email,
     )
 
 
@@ -90,6 +116,31 @@ def build_html_body(invitation_id, tenant_id, accept_url):
           <li><strong>Tenant ID:</strong> {tenant_id}</li>
           <li><strong>Accept URL:</strong> <a href="{accept_url}">{accept_url}</a></li>
         </ul>
+      </body>
+    </html>
+    """.strip()
+
+
+def build_verification_subject():
+    base_subject = "[Attestry] Email Verification Code"
+    return f"{SUBJECT_PREFIX} {base_subject}".strip() if SUBJECT_PREFIX else base_subject
+
+
+def build_verification_text_body(code, expires_min):
+    return (
+        "Your email verification code is below.\n\n"
+        f"Verification Code: {code}\n"
+        f"This code expires in {expires_min} minutes.\n"
+    )
+
+
+def build_verification_html_body(code, expires_min):
+    return f"""
+    <html>
+      <body>
+        <p>Your email verification code is below.</p>
+        <p style="font-size:24px;font-weight:bold;letter-spacing:4px;">{code}</p>
+        <p>This code expires in {expires_min} minutes.</p>
       </body>
     </html>
     """.strip()
