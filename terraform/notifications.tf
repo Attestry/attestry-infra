@@ -113,6 +113,11 @@ resource "aws_iam_role_policy" "invitation_email_lambda_ses" {
         Effect   = "Allow"
         Action   = ["ses:SendEmail", "ses:SendRawEmail"]
         Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = "${aws_s3_bucket.assets.arn}/*"
       }
     ]
   })
@@ -135,6 +140,7 @@ resource "aws_lambda_function" "invitation_email" {
       FROM_EMAIL_ADDRESS = var.from_email_address
       REPLY_TO_ADDRESS   = var.reply_to_address
       SUBJECT_PREFIX     = var.subject_prefix
+      S3_BUCKET          = aws_s3_bucket.assets.bucket
     }
   }
 

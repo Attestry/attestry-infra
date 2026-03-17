@@ -1,6 +1,9 @@
 import json
 import logging
 import os
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
@@ -10,6 +13,8 @@ LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
 SES_CLIENT = boto3.client("ses", region_name=os.environ.get("SES_REGION"))
+S3_CLIENT = boto3.client("s3")
+S3_BUCKET = os.environ.get("S3_BUCKET", "attestry-dev-assets")
 
 FROM_EMAIL_ADDRESS = os.environ["FROM_EMAIL_ADDRESS"]
 REPLY_TO_ADDRESS = os.environ.get("REPLY_TO_ADDRESS", "").strip()
@@ -131,18 +136,23 @@ def process_passport_manual_delivery(body):
     serial_number = body.get("serialNumber", "")
     model_name = body.get("modelName", "")
     message = body.get("message", "")
+    attachments = body.get("attachments", [])
 
     subject = build_passport_manual_subject(model_name)
     text_body = build_passport_manual_text_body(serial_number, model_name, message)
     html_body = build_passport_manual_html_body(serial_number, model_name, message)
 
-    send_email(recipient_email, subject, text_body, html_body)
+    if attachments:
+        send_email_with_attachments(recipient_email, subject, text_body, html_body, attachments)
+    else:
+        send_email(recipient_email, subject, text_body, html_body)
 
     LOGGER.info(
-        "Passport manual delivery email sent for passportId=%s tenantId=%s recipientEmail=%s",
+        "Passport manual delivery email sent for passportId=%s tenantId=%s recipientEmail=%s attachments=%d",
         passport_id,
         tenant_id,
         recipient_email,
+        len(attachments),
     )
 
 
@@ -199,6 +209,50 @@ def build_verification_html_body(code, expires_min):
       </body>
     </html>
     """.strip()
+
+
+def send_email_with_attachments(recipient, subject, text_body, html_body, attachments):
+    msg = MIMEMultipart("mixed")
+    msg["Subject"] = subject
+    msg["From"] = FROM_EMAIL_ADDRESS
+    msg["To"] = recipient
+    if REPLY_TO_ADDRESS:
+        msg["Reply-To"] = REPLY_TO_ADDRESS
+
+    body_part = MIMEMultipart("alternative")
+    body_part.attach(MIMEText(text_body, "plain", "utf-8"))
+    body_part.attach(MIMEText(html_body, "html", "utf-8"))
+    msg.attach(body_part)
+
+    for att in attachments:
+        object_key = att.get("objectKey")
+        file_name = att.get("fileName", "attachment")
+        content_type = att.get("contentType", "application/octet-stream")
+
+        if not object_key:
+            LOGGER.warning("Skipping attachment with missing objectKey")
+            continue
+
+        try:
+            s3_obj = S3_CLIENT.get_object(Bucket=S3_BUCKET, Key=object_key)
+            file_data = s3_obj["Body"].read()
+        except (BotoCoreError, ClientError) as exc:
+            LOGGER.error("Failed to download S3 object %s: %s", object_key, exc)
+            continue
+
+        maintype, _, subtype = content_type.partition("/")
+        att_part = MIMEApplication(file_data, _subtype=subtype if subtype else "octet-stream")
+        att_part.add_header("Content-Disposition", "attachment", filename=file_name)
+        msg.attach(att_part)
+
+    try:
+        SES_CLIENT.send_raw_email(
+            Source=FROM_EMAIL_ADDRESS,
+            Destinations=[recipient],
+            RawMessage={"Data": msg.as_string()},
+        )
+    except (BotoCoreError, ClientError) as exc:
+        raise RuntimeError("SES send_raw_email failed") from exc
 
 
 def send_email(recipient, subject, text_body, html_body):
