@@ -18,7 +18,7 @@ data:
           "title": "Core Logs",
           "type": "logs",
           "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
           "targets": [{
             "expr": "{namespace=\"attestry\", app_kubernetes_io_name=\"core\"}",
             "refId": "A"
@@ -38,7 +38,7 @@ data:
           "title": "Ledger Logs",
           "type": "logs",
           "gridPos": { "h": 12, "w": 24, "x": 0, "y": 12 },
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
           "targets": [{
             "expr": "{namespace=\"attestry\", app_kubernetes_io_name=\"ledger\"}",
             "refId": "A"
@@ -58,7 +58,7 @@ data:
           "title": "ERROR Logs (All Services)",
           "type": "logs",
           "gridPos": { "h": 12, "w": 24, "x": 0, "y": 24 },
-          "datasource": { "type": "loki", "uid": "loki" },
+          "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
           "targets": [{
             "expr": "{namespace=\"attestry\"} |= \"ERROR\"",
             "refId": "A"
