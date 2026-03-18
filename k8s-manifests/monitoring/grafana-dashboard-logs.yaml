@@ -20,7 +20,7 @@ data:
           "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
           "targets": [{
-            "expr": "{namespace=\"attestry\", app_kubernetes_io_name=\"core\"}",
+            "expr": "{namespace=\"attestry\", app=\"core\"}",
             "refId": "A"
           }],
           "options": {
@@ -40,7 +40,7 @@ data:
           "gridPos": { "h": 12, "w": 24, "x": 0, "y": 12 },
           "datasource": { "type": "loki", "uid": "P8E80F9AEF21F6940" },
           "targets": [{
-            "expr": "{namespace=\"attestry\", app_kubernetes_io_name=\"ledger\"}",
+            "expr": "{namespace=\"attestry\", app=\"ledger\"}",
             "refId": "A"
           }],
           "options": {
