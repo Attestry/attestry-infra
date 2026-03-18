@@ -25,7 +25,7 @@ data:
           "title": "Kafka Consume Duration",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
-          "targets": [{ "expr": "ledger_kafka_consume_duration", "legendFormat": "duration" }],
+          "targets": [{ "expr": "ledger_kafka_consume_duration_seconds_max", "legendFormat": "duration" }],
           "fieldConfig": { "defaults": { "unit": "s" } }
         },
         {
@@ -52,7 +52,7 @@ data:
           "title": "Ledger Append Duration",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
-          "targets": [{ "expr": "ledger_append_duration", "legendFormat": "duration" }],
+          "targets": [{ "expr": "ledger_append_duration_seconds_max", "legendFormat": "duration" }],
           "fieldConfig": { "defaults": { "unit": "s" } }
         },
         {
