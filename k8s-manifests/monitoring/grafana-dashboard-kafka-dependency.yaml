@@ -36,8 +36,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
           "targets": [
-            { "expr": "ledger_kafka_consume_lag", "legendFormat": "ledger consume lag" },
-            { "expr": "workflow_projection_lag", "legendFormat": "projection lag" }
+            { "expr": "ledger_kafka_consume_lag_seconds_max", "legendFormat": "ledger consume lag" },
+            { "expr": "workflow_projection_lag_seconds_max", "legendFormat": "projection lag" }
           ]
         },
         {

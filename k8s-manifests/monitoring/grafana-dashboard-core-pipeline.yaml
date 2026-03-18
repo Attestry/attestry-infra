@@ -87,8 +87,8 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
           "targets": [
-            { "expr": "workflow_projection_lag", "legendFormat": "lag" },
-            { "expr": "workflow_projection_refresh_duration", "legendFormat": "refresh duration" }
+            { "expr": "workflow_projection_lag_seconds_max", "legendFormat": "lag" },
+            { "expr": "workflow_projection_refresh_duration_seconds_max", "legendFormat": "refresh duration" }
           ]
         },
         {

@@ -32,7 +32,7 @@ data:
           "title": "Kafka Consume Lag",
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
-          "targets": [{ "expr": "ledger_kafka_consume_lag", "legendFormat": "lag" }]
+          "targets": [{ "expr": "ledger_kafka_consume_lag_seconds_max", "legendFormat": "lag" }]
         },
         {
           "title": "DLQ Rate",

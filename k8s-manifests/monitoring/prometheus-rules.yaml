@@ -146,7 +146,7 @@ spec:
           annotations:
             summary: "Projection DLQ is receiving messages"
         - alert: ProjectionLagHigh
-          expr: workflow_projection_lag > 1000
+          expr: workflow_projection_lag_seconds_max > 1000
           for: 5m
           labels:
             severity: warning
@@ -182,7 +182,7 @@ spec:
     - name: ledger.warning
       rules:
         - alert: LedgerConsumeLagHigh
-          expr: ledger_kafka_consume_lag > 1000
+          expr: ledger_kafka_consume_lag_seconds_max > 1000
           for: 5m
           labels:
             severity: warning
