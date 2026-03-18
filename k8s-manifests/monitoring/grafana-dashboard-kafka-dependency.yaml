@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-kafka-dependency
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  kafka-dependency.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "links": [],
+      "panels": [
+        {
+          "title": "Kafka Producer Errors",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [
+            { "expr": "rate(kafka_producer_record_error_total{job=~\"core|ledger\"}[5m])", "legendFormat": "{{ job }} errors" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Kafka Consumer Assigned Partitions",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [
+            { "expr": "kafka_consumer_assigned_partitions{job=~\"core|ledger\"}", "legendFormat": "{{ job }} {{ client_id }}" }
+          ]
+        },
+        {
+          "title": "Consumer Lag Comparison (Ledger vs Projection)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "targets": [
+            { "expr": "ledger_kafka_consume_lag", "legendFormat": "ledger consume lag" },
+            { "expr": "workflow_projection_lag", "legendFormat": "projection lag" }
+          ]
+        },
+        {
+          "title": "DB Health (Datasource)",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 12, "x": 0, "y": 16 },
+          "targets": [{ "expr": "hikaricp_connections{job=~\"core|ledger\"}", "legendFormat": "{{ job }} total" }],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "title": "DB Connection Pool Utilization",
+          "type": "timeseries",
+          "gridPos": { "h": 6, "w": 12, "x": 12, "y": 16 },
+          "targets": [
+            { "expr": "hikaricp_connections_active{job=~\"core|ledger\"} / hikaricp_connections_max{job=~\"core|ledger\"}", "legendFormat": "{{ job }} utilization" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "percentunit" } }
+        },
+        {
+          "title": "Scrape Success / Failure",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+          "targets": [
+            { "expr": "up{job=~\"core|ledger\"}", "legendFormat": "{{ job }} up" },
+            { "expr": "scrape_duration_seconds{job=~\"core|ledger\"}", "legendFormat": "{{ job }} scrape duration" }
+          ]
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["attestry", "kafka", "dependency"],
+      "templating": { "list": [] },
+      "time": { "from": "now-1h", "to": "now" },
+      "title": "Attestry — Kafka Client / Dependency View",
+      "uid": "attestry-kafka-dependency"
+    }

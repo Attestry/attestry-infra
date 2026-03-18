@@ -88,6 +88,57 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
           "targets": [{ "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"attestry\"}[1h])", "legendFormat": "{{ pod }}" }]
+        },
+        {
+          "title": "Health Summary",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 18, "x": 6, "y": 0 },
+          "targets": [{ "expr": "health_check_status{job=~\"core|ledger\"}", "legendFormat": "{{ job }} {{ name }}" }],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+              ]
+            }
+          }
+        },
+        {
+          "title": "JVM Live Thread Count",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 36 },
+          "targets": [{ "expr": "jvm_threads_live_threads{job=~\"core|ledger\"}", "legendFormat": "{{ job }}" }]
+        },
+        {
+          "title": "HikariCP Connections",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 36 },
+          "targets": [
+            { "expr": "hikaricp_connections_active{job=~\"core|ledger\"}", "legendFormat": "{{ job }} active" },
+            { "expr": "hikaricp_connections_idle{job=~\"core|ledger\"}", "legendFormat": "{{ job }} idle" },
+            { "expr": "hikaricp_connections_pending{job=~\"core|ledger\"}", "legendFormat": "{{ job }} pending" }
+          ]
+        },
+        {
+          "title": "HikariCP Connection Timeout",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 44 },
+          "targets": [{ "expr": "increase(hikaricp_connections_timeout_total{job=~\"core|ledger\"}[5m])", "legendFormat": "{{ job }} timeout" }]
+        },
+        {
+          "title": "OOMKilled Events",
+          "type": "stat",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 44 },
+          "targets": [{ "expr": "kube_pod_container_status_last_terminated_reason{namespace=\"attestry\", reason=\"OOMKilled\"}", "legendFormat": "{{ pod }}" }],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 1 }
+                ]
+              }
+            }
+          }
         }
       ],
       "schemaVersion": 39,

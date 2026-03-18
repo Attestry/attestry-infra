@@ -56,6 +56,27 @@ spec:
             severity: warning
           annotations:
             summary: "{{ $labels.job }} heap usage above 85%"
+        - alert: HikariConnectionPending
+          expr: hikaricp_connections_pending{job=~"core|ledger"} > 0
+          for: 3m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.job }} HikariCP has pending connections"
+        - alert: HikariConnectionTimeout
+          expr: increase(hikaricp_connections_timeout_total{job=~"core|ledger"}[5m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.job }} HikariCP connection timeout detected"
+        - alert: DbHealthDown
+          expr: hikaricp_connections{job=~"core|ledger"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.job }} DB connection pool has zero connections"
 
     # ── Core Outbox Critical ──
     - name: core.outbox.critical
