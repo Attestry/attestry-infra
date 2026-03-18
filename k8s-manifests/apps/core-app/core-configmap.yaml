@@ -8,6 +8,8 @@ data:
   AUTH_TOKEN_PROVIDER: REDIS
   # User action required: fill from `terraform -chdir=terraform output -raw rds_jdbc_url`
   DB_URL: jdbc:postgresql://attestry-dev-postgres.cvmogq088lqo.ap-northeast-2.rds.amazonaws.com:5432/attestry_dev
+  DB_POOL_MAX_SIZE: "20"
+  DB_POOL_MIN_IDLE: "5"
   # User action required: fill from `terraform -chdir=terraform output -raw rds_db_username`
   DB_USERNAME: attestry_admin
   KAFKA_BOOTSTRAP_SERVERS: attestry-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
