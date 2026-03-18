@@ -52,9 +52,9 @@ data:
           "type": "timeseries",
           "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
           "targets": [
-            { "expr": "ledger_outbox_publish_duration", "legendFormat": "publish" },
-            { "expr": "ledger_outbox_batch_duration", "legendFormat": "batch" },
-            { "expr": "ledger_outbox_claim_duration", "legendFormat": "claim" }
+            { "expr": "ledger_outbox_publish_duration_seconds_max", "legendFormat": "publish" },
+            { "expr": "ledger_outbox_batch_duration_seconds_max", "legendFormat": "batch" },
+            { "expr": "ledger_outbox_claim_duration_seconds_max", "legendFormat": "claim" }
           ],
           "fieldConfig": { "defaults": { "unit": "s" } }
         },
