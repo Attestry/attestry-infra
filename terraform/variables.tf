@@ -80,3 +80,9 @@ variable "invitation_lambda_batch_size" {
   type        = number
   default     = 10
 }
+
+variable "notification_dedupe_ttl_seconds" {
+  description = "TTL in seconds for notification deduplication records in DynamoDB."
+  type        = number
+  default     = 86400
+}

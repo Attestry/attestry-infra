@@ -17,7 +17,31 @@ locals {
 
   passport_manual_queue_name = "${local.name_prefix}-passport-manual-notification"
   passport_manual_dlq_name   = "${local.name_prefix}-passport-manual-notification-dlq"
+
+  notification_dedupe_table_name = "${local.name_prefix}-notification-dedupe"
 }
+
+# ── Notification Deduplication Table ──
+
+resource "aws_dynamodb_table" "notification_dedupe" {
+  name         = local.notification_dedupe_table_name
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "dedupeKey"
+
+  attribute {
+    name = "dedupeKey"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "expiresAt"
+    enabled        = true
+  }
+
+  tags = local.common_tags
+}
+
+# ── Invitation SQS ──
 
 resource "aws_sqs_queue" "invitation_dlq" {
   name                        = local.invitation_dlq_name
@@ -118,6 +142,14 @@ resource "aws_iam_role_policy" "invitation_email_lambda_ses" {
         Effect   = "Allow"
         Action   = ["s3:GetObject"]
         Resource = "${aws_s3_bucket.assets.arn}/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem"
+        ]
+        Resource = aws_dynamodb_table.notification_dedupe.arn
       }
     ]
   })
@@ -141,6 +173,8 @@ resource "aws_lambda_function" "invitation_email" {
       REPLY_TO_ADDRESS   = var.reply_to_address
       SUBJECT_PREFIX     = var.subject_prefix
       S3_BUCKET          = aws_s3_bucket.assets.bucket
+      DEDUPE_TABLE_NAME  = aws_dynamodb_table.notification_dedupe.name
+      DEDUPE_TTL_SECONDS = tostring(var.notification_dedupe_ttl_seconds)
     }
   }
 

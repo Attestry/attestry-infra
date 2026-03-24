@@ -135,6 +135,56 @@ spec:
           annotations:
             summary: "Outbox recovered events detected"
 
+    # ── Notification Outbox Critical ──
+    - name: notification.outbox.critical
+      rules:
+        - alert: NotificationOutboxFailedSizeAboveZero
+          expr: notification_outbox_failed_size > 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Notification outbox failed size is {{ $value }}"
+        - alert: NotificationOutboxPublishFailure
+          expr: rate(notification_outbox_publish_failure_count_total[5m]) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Notification outbox publish failures detected"
+
+    # ── Notification Outbox Warning ──
+    - name: notification.outbox.warning
+      rules:
+        - alert: NotificationOutboxProcessingStuck
+          expr: notification_outbox_processing_size > 0 and notification_outbox_processing_oldest_age > 300
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Notification outbox has PROCESSING rows older than {{ $value }}s"
+        - alert: NotificationOutboxRecoveryRateHigh
+          expr: sum(rate(notification_outbox_recovered_count_total[5m])) > 0.1
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Notification outbox recovery rate is elevated ({{ $value }}/s)"
+        - alert: NotificationOutboxPendingOldestAgeHigh
+          expr: notification_outbox_pending_oldest_age > 60
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Notification outbox oldest pending age is {{ $value }}s"
+        - alert: NotificationOutboxProcessingTimeout
+          expr: rate(notification_outbox_processing_timeout_count_total[5m]) > 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Notification outbox processing timeouts detected"
+
     # ── Core Projection ──
     - name: core.projection
       rules:
@@ -145,6 +195,20 @@ spec:
             severity: critical
           annotations:
             summary: "Projection DLQ is receiving messages"
+        - alert: ProjectionDlqPublishFailure
+          expr: sum(rate(workflow_projection_dlq_publish_failure_count_total[5m])) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Projection DLQ publish failures detected"
+        - alert: ProjectionConsumeFailure
+          expr: sum(rate(workflow_projection_consume_count_total{result="failure"}[5m])) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Projection consumer failures detected"
         - alert: ProjectionLagHigh
           expr: workflow_projection_lag_seconds_max > 1000
           for: 5m

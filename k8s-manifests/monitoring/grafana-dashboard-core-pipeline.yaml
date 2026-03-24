@@ -15,22 +15,29 @@ data:
       "links": [],
       "panels": [
         {
+          "title": "── Ledger Outbox ──",
+          "type": "row",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+          "collapsed": false,
+          "panels": []
+        },
+        {
           "title": "Outbox Pending Size",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
           "targets": [{ "expr": "ledger_outbox_pending_size", "legendFormat": "pending" }]
         },
         {
           "title": "Outbox Pending Oldest Age",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
           "targets": [{ "expr": "ledger_outbox_pending_oldest_age", "legendFormat": "oldest age" }],
           "fieldConfig": { "defaults": { "unit": "s" } }
         },
         {
           "title": "Outbox Processing / Failed Size",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
           "targets": [
             { "expr": "ledger_outbox_processing_size", "legendFormat": "processing" },
             { "expr": "ledger_outbox_failed_size", "legendFormat": "failed" }
@@ -39,7 +46,7 @@ data:
         {
           "title": "Outbox Publish Rate",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 9 },
           "targets": [
             { "expr": "rate(ledger_outbox_publish_count_total[5m])", "legendFormat": "total" },
             { "expr": "rate(ledger_outbox_publish_success_count_total[5m])", "legendFormat": "success" },
@@ -50,7 +57,7 @@ data:
         {
           "title": "Outbox Durations",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 9 },
           "targets": [
             { "expr": "ledger_outbox_publish_duration_seconds_max", "legendFormat": "publish" },
             { "expr": "ledger_outbox_batch_duration_seconds_max", "legendFormat": "batch" },
@@ -61,7 +68,7 @@ data:
         {
           "title": "Outbox Recovered / Timeout Rate",
           "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 9 },
           "targets": [
             { "expr": "rate(ledger_outbox_recovered_count_total[5m])", "legendFormat": "recovered" },
             { "expr": "rate(ledger_outbox_processing_timeout_count_total[5m])", "legendFormat": "timeout" }
@@ -69,32 +76,9 @@ data:
           "fieldConfig": { "defaults": { "unit": "ops" } }
         },
         {
-          "title": "Projection Consume Rate",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
-          "targets": [{ "expr": "rate(workflow_projection_consume_count_total[5m])", "legendFormat": "consume" }],
-          "fieldConfig": { "defaults": { "unit": "ops" } }
-        },
-        {
-          "title": "Projection DLQ Rate",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
-          "targets": [{ "expr": "rate(workflow_projection_dlq_count_total[5m])", "legendFormat": "DLQ" }],
-          "fieldConfig": { "defaults": { "unit": "ops" } }
-        },
-        {
-          "title": "Projection Lag / Refresh Duration",
-          "type": "timeseries",
-          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
-          "targets": [
-            { "expr": "workflow_projection_lag_seconds_max", "legendFormat": "lag" },
-            { "expr": "workflow_projection_refresh_duration_seconds_max", "legendFormat": "refresh duration" }
-          ]
-        },
-        {
           "title": "Outbox Ordering Violations",
           "type": "stat",
-          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 17 },
           "targets": [{ "expr": "increase(ledger_outbox_ordering_violation_count_total{application=\"attestry\"}[10m])", "legendFormat": "violations" }],
           "fieldConfig": {
             "defaults": {
@@ -106,10 +90,154 @@ data:
               }
             }
           }
+        },
+        {
+          "title": "── Workflow Projection Consumer ──",
+          "type": "row",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "title": "Consumer Result Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 26 },
+          "targets": [
+            { "expr": "sum(rate(workflow_projection_consume_count_total{result=\"success\"}[5m]))", "legendFormat": "success" },
+            { "expr": "sum(rate(workflow_projection_consume_count_total{result=\"ignored\"}[5m]))", "legendFormat": "ignored" },
+            { "expr": "sum(rate(workflow_projection_consume_count_total{result=\"failure\"}[5m]))", "legendFormat": "failure" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Projection Refresh Duration P95",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 26 },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(workflow_projection_refresh_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95" }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "title": "Projection Lag P95",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 26 },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(workflow_projection_lag_seconds_bucket[5m])) by (le))", "legendFormat": "p95" }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "title": "DLQ Routed Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 34 },
+          "targets": [{ "expr": "sum(rate(workflow_projection_dlq_count_total[5m]))", "legendFormat": "DLQ routed" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "DLQ Publish Success Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 34 },
+          "targets": [{ "expr": "sum(rate(workflow_projection_dlq_publish_success_count_total[5m]))", "legendFormat": "success" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "DLQ Publish Failure Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 34 },
+          "targets": [{ "expr": "sum(rate(workflow_projection_dlq_publish_failure_count_total[5m]))", "legendFormat": "failure" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "DLQ Publish Duration P95",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 42 },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(workflow_projection_dlq_publish_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95" }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "title": "── Notification Outbox ──",
+          "type": "row",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 50 },
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "title": "Pending Size",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 51 },
+          "targets": [{ "expr": "notification_outbox_pending_size", "legendFormat": "pending" }]
+        },
+        {
+          "title": "Processing Size",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 51 },
+          "targets": [{ "expr": "notification_outbox_processing_size", "legendFormat": "processing" }]
+        },
+        {
+          "title": "Failed Size",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 51 },
+          "targets": [{ "expr": "notification_outbox_failed_size", "legendFormat": "failed" }],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "red", "value": 1 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "title": "Pending Oldest Age",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 59 },
+          "targets": [{ "expr": "notification_outbox_pending_oldest_age", "legendFormat": "oldest age" }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "title": "Processing Oldest Age",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 59 },
+          "targets": [{ "expr": "notification_outbox_processing_oldest_age", "legendFormat": "oldest age" }],
+          "fieldConfig": { "defaults": { "unit": "s" } }
+        },
+        {
+          "title": "Claim Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 59 },
+          "targets": [{ "expr": "sum(rate(notification_outbox_claim_count_total[5m]))", "legendFormat": "claim" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Publish Success Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 67 },
+          "targets": [{ "expr": "sum(rate(notification_outbox_publish_success_count_total[5m]))", "legendFormat": "success" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Publish Failure Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 67 },
+          "targets": [{ "expr": "sum(rate(notification_outbox_publish_failure_count_total[5m]))", "legendFormat": "failure" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Recovery Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 67 },
+          "targets": [{ "expr": "sum(rate(notification_outbox_recovered_count_total[5m]))", "legendFormat": "recovered" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
+        },
+        {
+          "title": "Processing Timeout Recovery Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 75 },
+          "targets": [{ "expr": "sum(rate(notification_outbox_processing_timeout_count_total[5m]))", "legendFormat": "timeout" }],
+          "fieldConfig": { "defaults": { "unit": "ops" } }
         }
       ],
       "schemaVersion": 39,
-      "tags": ["attestry", "core", "outbox", "projection"],
+      "tags": ["attestry", "core", "outbox", "projection", "notification"],
       "templating": { "list": [] },
       "time": { "from": "now-1h", "to": "now" },
       "title": "Attestry — Core Event Pipeline",

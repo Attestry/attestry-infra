@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -15,6 +16,11 @@ LOGGER.setLevel(logging.INFO)
 SES_CLIENT = boto3.client("ses", region_name=os.environ.get("SES_REGION"))
 S3_CLIENT = boto3.client("s3")
 S3_BUCKET = os.environ.get("S3_BUCKET", "attestry-dev-assets")
+
+DYNAMODB = boto3.resource("dynamodb")
+DEDUPE_TABLE_NAME = os.environ.get("DEDUPE_TABLE_NAME", "")
+DEDUPE_TTL_SECONDS = int(os.environ.get("DEDUPE_TTL_SECONDS", "86400"))
+DEDUPE_TABLE = DYNAMODB.Table(DEDUPE_TABLE_NAME) if DEDUPE_TABLE_NAME else None
 
 FROM_EMAIL_ADDRESS = os.environ["FROM_EMAIL_ADDRESS"]
 REPLY_TO_ADDRESS = os.environ.get("REPLY_TO_ADDRESS", "").strip()
@@ -39,8 +45,68 @@ def lambda_handler(event, _context):
     return {"batchItemFailures": failures}
 
 
+def is_duplicate(dedupe_key):
+    """Check if this dedupe key was already processed. Returns True if duplicate."""
+    if not DEDUPE_TABLE:
+        return False
+
+    try:
+        resp = DEDUPE_TABLE.get_item(
+            Key={"dedupeKey": dedupe_key},
+            ConsistentRead=True,
+        )
+        return "Item" in resp
+    except (BotoCoreError, ClientError):
+        LOGGER.exception("Failed to check dedupe key %s, proceeding with send", dedupe_key)
+        return False
+
+
+def mark_processed(dedupe_key):
+    """Record that this dedupe key has been processed."""
+    if not DEDUPE_TABLE:
+        return
+
+    try:
+        DEDUPE_TABLE.put_item(Item={
+            "dedupeKey": dedupe_key,
+            "processedAt": int(time.time()),
+            "expiresAt": int(time.time()) + DEDUPE_TTL_SECONDS,
+        })
+    except (BotoCoreError, ClientError):
+        LOGGER.exception("Failed to mark dedupe key %s as processed", dedupe_key)
+
+
+def extract_dedupe_key(body):
+    """Extract the deduplication key from the message body based on type."""
+    message_type = body.get("type")
+
+    if message_type == INVITATION_TYPE:
+        invitation_id = body.get("invitationId")
+        return f"invitation:{invitation_id}" if invitation_id else None
+
+    if message_type == SIGNUP_EMAIL_VERIFICATION_TYPE:
+        verification_id = body.get("verificationId")
+        return f"verification:{verification_id}" if verification_id else None
+
+    if message_type == PASSPORT_MANUAL_DELIVERY_TYPE:
+        passport_id = body.get("passportId")
+        recipient_email = body.get("recipientEmail")
+        evidence_group_id = body.get("evidenceGroupId")
+        if passport_id and recipient_email and evidence_group_id:
+            return f"passport:{passport_id}:{recipient_email}:{evidence_group_id}"
+        return None
+
+    return None
+
+
 def process_record(record):
     body = json.loads(record["body"])
+
+    dedupe_key = extract_dedupe_key(body)
+    if dedupe_key and is_duplicate(dedupe_key):
+        LOGGER.info("Skipping duplicate message with dedupe key: %s", dedupe_key)
+        return
+
     message_type = body.get("type")
 
     if message_type == INVITATION_TYPE:
@@ -51,6 +117,10 @@ def process_record(record):
         process_passport_manual_delivery(body)
     else:
         LOGGER.info("Skipping unsupported message type: %s", message_type)
+        return
+
+    if dedupe_key:
+        mark_processed(dedupe_key)
 
 
 def process_invitation(body):
