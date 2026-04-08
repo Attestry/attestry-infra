@@ -29,7 +29,7 @@ spec:
         - name: ghcr-credentials
       containers:
         - name: core
-          image: ghcr.io/attestry/app:913da8f19820
+          image: ghcr.io/attestry/app:27e6a61600d0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
