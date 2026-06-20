@@ -1,4 +1,4 @@
-<img width="1220" height="616" alt="image" src="https://github.com/user-attachments/assets/86ef35db-2c87-4dfb-95a0-07f496831095" /># Attestry Infrastructure 
+# Attestry Infrastructure 
 
 Terraform, EKS, ArgoCD, Kafka, Redis, RDS, Prometheus/Grafana 기반으로 구성한 AWS 인프라 저장소입니다.  
 단순 배포 스크립트 모음이 아니라, 실제 운영을 염두에 두고 네트워크 분리, 워크로드 격리, GitOps, 이벤트 처리, 관측성까지 일관되게 설계한 점을 보여주는 것을 목표로 했습니다.
